@@ -1,0 +1,144 @@
+// Start Code//******************************************************************************
+// LCD interface
+//  
+//	RS	    P6.1
+//	R/W	 GND 
+//	E	     P6.2 
+//     DB0        P4.0
+//     DB1        P4.1
+//     DB2        P4.2
+//     DB3        P4.3
+//	DB4	 P4.4
+//	DB5	 P4.5
+//	DB6	 P4.6
+//	DB7	 P4.7
+//
+//******************************************************************************
+
+
+#include "msp430x21x2.h"
+
+
+// Global Functions
+void init_lcm(void);       // LCD Init
+void clr_lcm(void);        // LCD  clear
+void delay(int);              // Delay
+void strobe(void);         // Enable
+
+ void main()
+ 	{
+     	int o;
+ 	    WDTCTL = WDTPW + WDTHOLD; // Stop watchdog timer  
+ 	 
+ 	 
+ 	         
+           // LCD port
+             	P4DIR |= 0xFF;
+              P4OUT &= 0x00;	 
+ 	 
+            	for(o = 0; o < 0xEF; o++)
+                delay(100);                   // Start Delay
+ 	 
+             init_lcm();	                                                               //  LCDInit
+ 	           clr_lcm();   
+P6OUT &= ~(BIT 2);
+
+P6OUT |= BIT1;
+
+P6OUT &= ~0X00;
+
+                                                               // Clear the disp   
+while(1)
+{
+	lcddisp("Game begins");
+	__delay_cycles(1000000);
+}
+	return 0;
+ 	 
+ 	}
+
+
+void lcddisp(unsigned char *trans)
+{ int i=0;
+	init();
+	P1OUT=0X80;
+	inst();
+	  while(*trans!='\0')
+	 {
+	 P1OUT=*trans++;
+	 dat();
+	 i++;
+	 if(i==16)
+	 {P1OUT=0XC0;
+	 inst();}
+	 }
+}
+
+
+
+
+
+
+
+
+void init_lcm(void)
+{ 
+   
+
+P4OUT = 0x00;            // Send instruction 
+  P4OUT = 0x38;        // Send instruction 	 
+  strobe();
+ 
+	__delay_cycles(2000);
+ 
+  // Cursor (0x0F) 
+   P4OUT = 0x00;            // Send instruction 
+     P4OUT |= 0x0F;                       // Send instruction 
+
+  strobe();
+ 
+	__delay_cycles(2000);
+   
+   
+  // Clear LCD (0x01)
+   
+  //HN
+  
+  P4OUT = 0x00;       // Send instruction 
+  P4OUT |= 0x01;
+  strobe();
+   
+  
+	__delay_cycles(1000000);       // Big Delay
+ 
+ 
+}
+
+
+void strobe(void)
+{  // E-pulse
+  P4OUT = P3OUT | 0x40;          // E -ON 
+  delay(200); 
+  P4OUT = P3OUT & 0xBF;       // E - OFF 
+  
+	__delay_cycles(20000);
+}
+
+
+void clr_lcm(void)
+{
+ 
+  P4OUT = 0x00;        // Send instruction 
+  P4OUT |= 0x01;
+  strobe();
+   
+}
+
+
+
+void delay(int d)
+{ 
+  int i; 
+  for(i = 0; i <5*d; i++);
+
+}
